@@ -15,7 +15,7 @@ interface AuthState {
   checkAuth: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>()((set) => ({
+export const useAuthStore = create<AuthState>()((set, get) => ({
   user: null,
   isLoading: true,
   isAuthenticated: false,
@@ -29,6 +29,11 @@ export const useAuthStore = create<AuthState>()((set) => ({
     set({ user: null, isAuthenticated: false });
   },
   checkAuth: async () => {
+    const currentState = get();
+    if (currentState.isAuthenticated && currentState.user) {
+      set({ isLoading: false });
+      return;
+    }
     set({ isLoading: true });
     try {
       const response = await api.auth.me();

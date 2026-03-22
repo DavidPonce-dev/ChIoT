@@ -3,7 +3,7 @@ import { verifyToken, AuthRequest } from '../middleware/auth';
 import { Device } from '../models/Device';
 import mongoose from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { mqttClient } from '../mqttClient';
 import { createDeviceSchema, uuidParamSchema, claimDeviceSchema } from '../validators/device';
 import { generateSecurePassword, sanitizeMqttUser } from '../utils/crypto';
@@ -53,7 +53,9 @@ router.post('/', verifyToken, async (req: AuthRequest, res: Response) => {
     const mqttPass = generateSecurePassword();
 
     try {
-      execSync(`mosquitto_passwd -b /etc/mosquitto/passwd "${mqttUser}" "${mqttPass}"`);
+      execFileSync('mosquitto_passwd', ['-b', '/etc/mosquitto/passwd', mqttUser, mqttPass], {
+        stdio: 'ignore',
+      });
       logger.info({ mqttUser }, 'Usuario MQTT creado');
     } catch (err) {
       logger.warn({ err, mqttUser }, 'No se pudo registrar el usuario MQTT');
@@ -98,7 +100,9 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
     const mqttPass = generateSecurePassword();
 
     try {
-      execSync(`mosquitto_passwd -b /etc/mosquitto/passwd "${mqttUser}" "${mqttPass}"`);
+      execFileSync('mosquitto_passwd', ['-b', '/etc/mosquitto/passwd', mqttUser, mqttPass], {
+        stdio: 'ignore',
+      });
       logger.info({ mqttUser }, 'Usuario MQTT creado');
     } catch (err) {
       logger.warn({ err, mqttUser }, 'No se pudo registrar usuario MQTT');

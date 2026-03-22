@@ -24,7 +24,7 @@
     "test": "npm run test --workspace=backend",
     "up": "docker compose --profile dev up -d --build",
     "down": "docker compose --profile dev down",
-    "logs": "docker compose logs -f",
+    "logs": "docker compose logs -f frontend backend",
     "logs:backend": "docker compose logs -f backend",
     "logs:frontend": "docker compose logs -f frontend",
     "reset:frontend": "docker stop ChiotPlatform-frontend && docker rm ChiotPlatform-frontend && docker compose up -d frontend"

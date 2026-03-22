@@ -29,7 +29,7 @@ export async function connectMQTT(): Promise<MqttClient> {
     client.on('message', async (topic, message) => {
       try {
         const parts = topic.split('/');
-        
+
         if (parts[0] === 'devices' && parts[2] === 'state') {
           const uuid = parts[1];
           const payload = JSON.parse(message.toString());
@@ -40,7 +40,11 @@ export async function connectMQTT(): Promise<MqttClient> {
             return;
           }
 
-          const updatedDevice = await Device.findOneAndUpdate({ uuid }, { state: payload }, { new: true });
+          const updatedDevice = await Device.findOneAndUpdate(
+            { uuid },
+            { state: payload },
+            { new: true }
+          );
 
           if (updatedDevice?.owner) {
             broadcastToUser(updatedDevice.owner.toString(), 'device_state_changed', {
@@ -51,11 +55,10 @@ export async function connectMQTT(): Promise<MqttClient> {
           }
 
           logger.info({ uuid, state: payload }, 'Estado actualizado');
-        }
-        else if (topic === 'devices/online') {
+        } else if (topic === 'devices/online') {
           const uuid = message.toString();
           const device = await Device.findOne({ uuid });
-          
+
           if (device) {
             logger.info({ uuid }, 'Dispositivo conectado');
             if (device.owner) {
@@ -64,13 +67,12 @@ export async function connectMQTT(): Promise<MqttClient> {
           } else {
             logger.warn({ uuid }, 'Dispositivo no registrado se conectó');
           }
-        }
-        else if (parts[2] === 'register') {
+        } else if (parts[2] === 'register') {
           const uuid = parts[1];
           const payload = JSON.parse(message.toString());
-          
+
           logger.info({ uuid, payload }, 'Solicitud de registro de dispositivo');
-          
+
           const device = await Device.findOne({ uuid });
           if (device && device.owner) {
             broadcastToUser(device.owner.toString(), 'device_registered', { uuid, payload });

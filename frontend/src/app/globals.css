@@ -1,6 +1,28 @@
 @import "tailwindcss";
 
 @theme {
+  --color-background: #fafafa;
+  --color-foreground: #09090b;
+  --color-card: #ffffff;
+  --color-card-foreground: #09090b;
+  --color-primary: #6366f1;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f4f4f5;
+  --color-secondary-foreground: #09090b;
+  --color-muted: #e4e4e7;
+  --color-muted-foreground: #71717a;
+  --color-accent: #22c55e;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e4e4e7;
+  --color-ring: #6366f1;
+  --radius-lg: 1rem;
+  --radius-md: calc(var(--radius-lg) - 2px);
+  --radius-sm: calc(var(--radius-lg) - 4px);
+}
+
+.dark {
   --color-background: #09090b;
   --color-foreground: #fafafa;
   --color-card: #18181b;
@@ -17,9 +39,6 @@
   --color-destructive-foreground: #ffffff;
   --color-border: #3f3f46;
   --color-ring: #6366f1;
-  --radius-lg: 1rem;
-  --radius-md: calc(var(--radius-lg) - 2px);
-  --radius-sm: calc(var(--radius-lg) - 4px);
 }
 
 @layer base {
@@ -45,6 +64,16 @@
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .dark .glass {
+    background: rgba(255, 255, 255, 0.05);
   }
 }
 

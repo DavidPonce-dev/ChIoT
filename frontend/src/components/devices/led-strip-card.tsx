@@ -1,74 +1,70 @@
 "use client";
 
 import { useState } from "react";
-import { api, LedStripDevice, LedStripState } from "@/lib/api";
-import { Loader2, Trash2 } from "lucide-react";
+import { useToast } from "@/components/ui/toaster";
+import { useLedStripActions, useDeleteDevice } from "@/hooks/use-devices";
+import { DeleteButton } from "./delete-button";
+import { OnlineIndicator } from "@/components/ui/online-indicator";
+import type { LedStripDevice, LedStripState, LedStripMode } from "@/lib/api";
+import { Loader2 } from "lucide-react";
 
 interface LedStripCardProps {
   device: LedStripDevice;
-  onDelete?: () => void;
 }
 
-type LedStripMode = "static" | "rainbow" | "fire" | "wave" | "candle";
 const MODES: LedStripMode[] = ["static", "rainbow", "fire", "wave", "candle"];
 
-export function LedStripCard({ device, onDelete }: LedStripCardProps) {
-  const [loading, setLoading] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+const MODE_LABELS: Record<LedStripMode, string> = {
+  static: "Static",
+  rainbow: "Rainbow",
+  fire: "Fuego",
+  wave: "Onda",
+  candle: "Vela",
+};
+
+export function LedStripCard({ device }: LedStripCardProps) {
+  const { toast } = useToast();
   const state = device.state;
+  const { setColor, setBrightness, setMode, setSpeed, isUpdating } = useLedStripActions(device.uuid);
+  const deleteDevice = useDeleteDevice();
 
-  const handleUpdate = async (updates: Partial<LedStripState>) => {
-    setLoading(true);
+  const handleUpdate = async (updates: Partial<LedStripState>, successMsg?: string) => {
     try {
-      await api.ledStrips.update(device.uuid, updates);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!confirm("¿Eliminar este dispositivo?")) return;
-    setDeleting(true);
-    try {
-      await api.ledStrips.delete(device.uuid);
-      onDelete?.();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setDeleting(false);
+      if (updates.color) setColor(updates.color);
+      if (updates.brightness !== undefined) setBrightness(updates.brightness);
+      if (updates.mode) setMode(updates.mode);
+      if (updates.speed !== undefined) setSpeed(updates.speed);
+      if (successMsg) toast("success", successMsg);
+    } catch {
+      toast("error", "Error al actualizar");
     }
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5">
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 relative">
       <div className="flex items-start justify-between mb-4">
-        <div>
-          <h3 className="font-semibold text-lg">{device.name}</h3>
-          <p className="text-sm text-muted-foreground">Tira LED</p>
+        <div className="flex items-center gap-3">
+          <div>
+            <h3 className="font-semibold text-lg">{device.name}</h3>
+            <p className="text-sm text-[var(--muted-foreground)]">Tira LED</p>
+          </div>
+          <OnlineIndicator uuid={device.uuid} size="sm" />
         </div>
-        <button
-          onClick={handleDelete}
-          disabled={deleting}
-          className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-        >
-          {deleting ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Trash2 className="w-4 h-4" />
-          )}
-        </button>
+        <DeleteButton
+          uuid={device.uuid}
+          type="LED_STRIP"
+          deviceName={device.name}
+        />
       </div>
 
       <div
-        className="w-full h-3 rounded-full mb-4 border border-border"
-        style={{ backgroundColor: state.color || "#ffffff" }}
+        className="w-full h-3 rounded-full mb-4 border border-[var(--border)] transition-all"
+        style={{ backgroundColor: state.color || "#ffffff", opacity: (state.brightness ?? 100) / 100 }}
       />
 
       <div className="space-y-4">
         <div>
-          <label className="text-sm text-muted-foreground mb-2 block">
+          <label className="text-sm text-[var(--muted-foreground)] mb-2 block">
             Brillo: {state.brightness ?? 100}%
           </label>
           <input
@@ -77,13 +73,13 @@ export function LedStripCard({ device, onDelete }: LedStripCardProps) {
             max="100"
             value={state.brightness ?? 100}
             onChange={(e) => handleUpdate({ brightness: Number(e.target.value) })}
-            disabled={loading}
-            className="w-full accent-primary"
+            disabled={isUpdating}
+            className="w-full accent-[var(--primary)]"
           />
         </div>
 
         <div>
-          <label className="text-sm text-muted-foreground mb-2 block">
+          <label className="text-sm text-[var(--muted-foreground)] mb-2 block">
             Color
           </label>
           <div className="flex gap-2">
@@ -92,13 +88,14 @@ export function LedStripCard({ device, onDelete }: LedStripCardProps) {
                 <button
                   key={c}
                   onClick={() => handleUpdate({ color: c })}
-                  disabled={loading}
+                  disabled={isUpdating}
                   className={`w-8 h-8 rounded-lg border-2 transition-all ${
                     state.color === c
                       ? "border-white scale-110"
                       : "border-transparent"
                   }`}
                   style={{ backgroundColor: c }}
+                  aria-label={`Color ${c}`}
                 />
               )
             )}
@@ -112,7 +109,7 @@ export function LedStripCard({ device, onDelete }: LedStripCardProps) {
         </div>
 
         <div>
-          <label className="text-sm text-muted-foreground mb-2 block">
+          <label className="text-sm text-[var(--muted-foreground)] mb-2 block">
             Modo
           </label>
           <div className="flex flex-wrap gap-2">
@@ -120,21 +117,21 @@ export function LedStripCard({ device, onDelete }: LedStripCardProps) {
               <button
                 key={mode}
                 onClick={() => handleUpdate({ mode })}
-                disabled={loading}
+                disabled={isUpdating}
                 className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
                   state.mode === mode
-                    ? "bg-primary text-white"
-                    : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                    ? "bg-[var(--primary)] text-white"
+                    : "bg-[var(--secondary)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)]/80"
                 }`}
               >
-                {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                {MODE_LABELS[mode]}
               </button>
             ))}
           </div>
         </div>
 
         <div>
-          <label className="text-sm text-muted-foreground mb-2 block">
+          <label className="text-sm text-[var(--muted-foreground)] mb-2 block">
             Velocidad: {state.speed ?? 50}%
           </label>
           <input
@@ -143,13 +140,13 @@ export function LedStripCard({ device, onDelete }: LedStripCardProps) {
             max="100"
             value={state.speed ?? 50}
             onChange={(e) => handleUpdate({ speed: Number(e.target.value) })}
-            disabled={loading}
-            className="w-full accent-primary"
+            disabled={isUpdating}
+            className="w-full accent-[var(--primary)]"
           />
         </div>
       </div>
 
-      {loading && (
+      {isUpdating && (
         <div className="absolute top-2 right-2">
           <Loader2 className="w-4 h-4 animate-spin" />
         </div>

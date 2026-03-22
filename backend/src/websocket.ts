@@ -1,6 +1,9 @@
+import { IncomingMessage } from 'http';
+import { URL } from 'url';
 import { WebSocket, WebSocketServer } from 'ws';
 import jwt from 'jsonwebtoken';
 import { logger } from './config/logger';
+import { isTokenBlacklisted } from './utils/jwtBlacklist';
 
 interface AuthenticatedWebSocket extends WebSocket {
   userId?: string;
@@ -9,20 +12,58 @@ interface AuthenticatedWebSocket extends WebSocket {
 
 const clients = new Map<string, Set<AuthenticatedWebSocket>>();
 
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+];
+
+function validateOrigin(origin: string | undefined): boolean {
+  if (!origin) return false;
+
+  try {
+    const originUrl = new URL(origin);
+    const allowed = ALLOWED_ORIGINS.some((allowed) => {
+      try {
+        const allowedUrl = new URL(allowed);
+        return originUrl.hostname === allowedUrl.hostname && originUrl.port === allowedUrl.port;
+      } catch {
+        return false;
+      }
+    });
+    return allowed;
+  } catch {
+    return false;
+  }
+}
+
 export function setupWebSocket(wss: WebSocketServer): void {
-  wss.on('connection', (ws: AuthenticatedWebSocket, _req) => {
+  wss.on('connection', (ws: AuthenticatedWebSocket, req: IncomingMessage) => {
+    const origin = req.headers.origin;
+
+    if (!validateOrigin(origin)) {
+      logger.warn({ origin }, 'WebSocket connection rejected - invalid origin');
+      ws.close(1008, 'Invalid origin');
+      return;
+    }
+
     ws.isAlive = true;
 
     ws.on('pong', () => {
       ws.isAlive = true;
     });
 
-    ws.on('message', (data) => {
+    ws.on('message', async (data) => {
       try {
         const message = JSON.parse(data.toString());
 
         if (message.type === 'auth') {
           const token = message.token;
+
+          if (await isTokenBlacklisted(token)) {
+            ws.send(JSON.stringify({ type: 'auth', success: false, error: 'Token revocado' }));
+            return;
+          }
+
           try {
             const decoded = verifySocketToken(token);
             ws.userId = decoded.id;
@@ -78,7 +119,7 @@ export function setupWebSocket(wss: WebSocketServer): void {
     clearInterval(interval);
   });
 
-  logger.info('WebSocket server initialized');
+  logger.info({ allowedOrigins: ALLOWED_ORIGINS }, 'WebSocket server initialized');
 }
 
 export function notifyUser(userId: string, payload: object): void {
@@ -97,5 +138,7 @@ export function broadcastToUser(userId: string, event: string, data: object): vo
 }
 
 function verifySocketToken(token: string): { id: string } {
-  return jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+  return jwt.verify(token, process.env.JWT_SECRET as string, {
+    maxAge: '24h',
+  }) as { id: string };
 }

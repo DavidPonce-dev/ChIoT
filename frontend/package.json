@@ -7,26 +7,38 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.80.2",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.511.0",
     "next": "15.2.4",
+    "next-pwa": "^5.6.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "zustand": "^5.0.5",
-    "@tanstack/react-query": "^5.80.2",
-    "lucide-react": "^0.511.0",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^3.3.0"
+    "recharts": "^3.8.0",
+    "tailwind-merge": "^3.3.0",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.7",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5",
-    "tailwindcss": "^4.1.7",
-    "@tailwindcss/postcss": "^4.1.7",
+    "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9",
-    "eslint-config-next": "15.2.4"
+    "eslint-config-next": "15.2.4",
+    "jsdom": "^29.0.1",
+    "tailwindcss": "^4.1.7",
+    "typescript": "^5",
+    "vitest": "^4.1.0"
   }
 }

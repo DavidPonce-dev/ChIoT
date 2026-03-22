@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Menu, X, Zap, LogOut, User, LayoutDashboard } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ConnectionIndicator } from "@/components/ui/connection-indicator";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +32,7 @@ export function Navbar() {
 
   const handleLogout = async () => {
     await logout();
-    router.push("/");
+    router.push("/home");
     setIsDropdownOpen(false);
   };
 
@@ -49,7 +51,7 @@ export function Navbar() {
               <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/25">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-foreground">chIoT</span>
+              <span className="text-xl font-bold text-foreground">chiot platform</span>
             </Link>
 
             <div className="hidden md:flex items-center gap-1">
@@ -148,7 +150,7 @@ export function Navbar() {
             </Link>
 
             <Link
-              href="/"
+              href="/dashboard"
               className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg transition-all"
             >
               <LayoutDashboard className="w-4 h-4" />
@@ -156,7 +158,9 @@ export function Navbar() {
             </Link>
           </div>
 
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-3">
+            <ConnectionIndicator />
+            <ThemeToggle />
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -169,14 +173,22 @@ export function Navbar() {
               </button>
               
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-xl py-1 animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-4 py-3 border-b border-border">
+                <div className="absolute right-0 mt-2 w-56 bg-[var(--card)] border border-[var(--border)] rounded-lg shadow-xl py-1 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="px-4 py-3 border-b border-[var(--border)]">
                     <p className="text-sm font-medium text-foreground">{user?.email}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Cuenta</p>
+                    <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Cuenta</p>
                   </div>
+                  <Link
+                    href="/dashboard/profile"
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--muted-foreground)] hover:text-foreground hover:bg-[var(--secondary)]/50 transition-all"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    <User className="w-4 h-4" />
+                    Mi Perfil
+                  </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-secondary/50 transition-all"
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-[var(--secondary)]/50 transition-all"
                   >
                     <LogOut className="w-4 h-4" />
                     Cerrar sesión
@@ -199,19 +211,26 @@ export function Navbar() {
         <div className="md:hidden bg-background border-b border-border">
           <div className="px-4 py-4 space-y-3">
             <Link
-              href="/"
+              href="/dashboard"
               className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg"
               onClick={() => setIsOpen(false)}
             >
               <LayoutDashboard className="w-4 h-4" />
               Dashboard
             </Link>
-            <div className="pt-3 border-t border-border">
-              <p className="text-xs text-muted-foreground px-3 mb-2">CUENTA</p>
-              <p className="px-3 py-2 text-sm font-medium text-foreground">{user?.email}</p>
+            <div className="pt-3 border-t border-[var(--border)]">
+              <p className="text-xs text-[var(--muted-foreground)] px-3 mb-2">CUENTA</p>
+              <Link
+                href="/dashboard/profile"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--muted-foreground)] hover:text-foreground hover:bg-[var(--secondary)]/50 rounded-lg"
+                onClick={() => setIsOpen(false)}
+              >
+                <User className="w-4 h-4" />
+                Mi Perfil
+              </Link>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-secondary/50 rounded-lg"
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-[var(--secondary)]/50 rounded-lg"
               >
                 <LogOut className="w-4 h-4" />
                 Cerrar sesión

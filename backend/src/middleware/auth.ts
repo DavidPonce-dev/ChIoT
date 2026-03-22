@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { isTokenBlacklisted } from '../utils/jwtBlacklist';
 
 export interface AuthRequest extends Request {
   userId?: string;
@@ -7,7 +8,7 @@ export interface AuthRequest extends Request {
 
 const TOKEN_COOKIE_NAME = 'chiotplatform_token';
 
-export function verifyToken(req: AuthRequest, res: Response, next: NextFunction) {
+export async function verifyToken(req: AuthRequest, res: Response, next: NextFunction) {
   let token: string | undefined;
 
   const cookies = req.cookies as Record<string, string> | undefined;
@@ -25,9 +26,18 @@ export function verifyToken(req: AuthRequest, res: Response, next: NextFunction)
   }
 
   try {
+    if (await isTokenBlacklisted(token)) {
+      return res.status(401).json({ message: 'Token ha sido revocado' });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string, {
       algorithms: ['HS256'],
-    }) as { id: string };
+    }) as { id: string; jti?: string };
+
+    if (!decoded.id) {
+      return res.status(401).json({ message: 'Token inválido' });
+    }
+
     req.userId = decoded.id;
     next();
   } catch {

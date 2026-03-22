@@ -6,7 +6,8 @@ const options: swaggerJsdoc.Options = {
     info: {
       title: 'chiot platform API',
       version: '1.0.0',
-      description: 'Backend IoT para gestión de dispositivos inteligentes. Sistema monorepo que incluye backend API REST, MQTT para dispositivos IoT, WebSocket para notificaciones en tiempo real, y BLE provisioning para configuración de dispositivos.',
+      description:
+        'Backend IoT para gestión de dispositivos inteligentes. Sistema monorepo que incluye backend API REST, MQTT para dispositivos IoT, WebSocket para notificaciones en tiempo real, y BLE provisioning para configuración de dispositivos.',
       contact: {
         name: 'API Support',
       },
@@ -43,7 +44,11 @@ const options: swaggerJsdoc.Options = {
           type: 'object',
           properties: {
             email: { type: 'string', format: 'email', description: 'Email del usuario' },
-            password: { type: 'string', format: 'password', description: 'Contraseña (min 8 caracteres)' },
+            password: {
+              type: 'string',
+              format: 'password',
+              description: 'Contraseña (min 8 caracteres)',
+            },
           },
           required: ['email', 'password'],
         },
@@ -67,10 +72,10 @@ const options: swaggerJsdoc.Options = {
           properties: {
             uuid: { type: 'string', format: 'uuid', description: 'UUID único del dispositivo' },
             name: { type: 'string', description: 'Nombre del dispositivo' },
-            type: { 
-              type: 'string', 
+            type: {
+              type: 'string',
               enum: ['LED_STRIP', 'thermostat', 'sensor', 'smart_lock'],
-              description: 'Tipo de dispositivo'
+              description: 'Tipo de dispositivo',
             },
             owner: { type: 'string', nullable: true, description: 'ID del propietario' },
             state: { type: 'object', description: 'Estado actual del dispositivo' },
@@ -94,9 +99,22 @@ const options: swaggerJsdoc.Options = {
           properties: {
             power: { type: 'boolean', description: 'Encendido/apagado' },
             brightness: { type: 'number', minimum: 0, maximum: 100, description: 'Brillo (0-100)' },
-            color: { type: 'string', pattern: '^#[0-9A-Fa-f]{6}$', description: 'Color en hexadecimal' },
-            mode: { type: 'string', enum: ['static', 'rainbow', 'fire', 'wave', 'candle'], description: 'Modo de operación' },
-            speed: { type: 'number', minimum: 1, maximum: 255, description: 'Velocidad de animación' },
+            color: {
+              type: 'string',
+              pattern: '^#[0-9A-Fa-f]{6}$',
+              description: 'Color en hexadecimal',
+            },
+            mode: {
+              type: 'string',
+              enum: ['static', 'rainbow', 'fire', 'wave', 'candle'],
+              description: 'Modo de operación',
+            },
+            speed: {
+              type: 'number',
+              minimum: 1,
+              maximum: 255,
+              description: 'Velocidad de animación',
+            },
           },
         },
         LedStripUpdate: {
@@ -112,14 +130,28 @@ const options: swaggerJsdoc.Options = {
         ThermostatState: {
           type: 'object',
           properties: {
-            temperature: { type: 'number', minimum: 0, maximum: 50, description: 'Temperatura objetivo' },
-            mode: { type: 'string', enum: ['off', 'cool', 'heat'], description: 'Modo de operación' },
+            temperature: {
+              type: 'number',
+              minimum: 0,
+              maximum: 50,
+              description: 'Temperatura objetivo',
+            },
+            mode: {
+              type: 'string',
+              enum: ['off', 'cool', 'heat'],
+              description: 'Modo de operación',
+            },
           },
         },
         ThermostatSetTemp: {
           type: 'object',
           properties: {
-            temperature: { type: 'number', minimum: 0, maximum: 50, description: 'Temperatura objetivo' },
+            temperature: {
+              type: 'number',
+              minimum: 0,
+              maximum: 50,
+              description: 'Temperatura objetivo',
+            },
             mode: { type: 'string', enum: ['off', 'cool', 'heat'], description: 'Modo (opcional)' },
           },
           required: ['temperature'],
@@ -162,10 +194,10 @@ const options: swaggerJsdoc.Options = {
           type: 'object',
           properties: {
             error: { type: 'string' },
-            errors: { 
-              type: 'array', 
+            errors: {
+              type: 'array',
               items: { type: 'object' },
-              description: 'Errores de validación Zod'
+              description: 'Errores de validación Zod',
             },
             message: { type: 'string' },
           },

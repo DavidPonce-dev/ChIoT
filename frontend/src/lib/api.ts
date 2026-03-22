@@ -1,35 +1,92 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const DEFAULT_TIMEOUT = 10000;
 
 interface FetchOptions extends RequestInit {
   token?: string;
+  timeout?: number;
 }
 
-async function fetchAPI<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
-  const { token, ...fetchOptions } = options;
+let authCallback: (() => void) | null = null;
+
+export function setAuthCallback(callback: () => void) {
+  authCallback = callback;
+}
+
+async function fetchWithTimeout(url: string, options: RequestInit, timeout: number): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
   
-  const headers: HeadersInit = {
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    return response;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function fetchWithRetry<T>(
+  url: string,
+  options: RequestInit,
+  retries = 3,
+  timeout = DEFAULT_TIMEOUT
+): Promise<T> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const response = await fetchWithTimeout(url, options, timeout);
+      
+      if (response.status === 401 && attempt < retries) {
+        await new Promise((r) => setTimeout(r, Math.pow(2, attempt) * 500));
+        continue;
+      }
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: "Error desconocido" }));
+        if (response.status === 401) {
+          authCallback?.();
+        }
+        throw new Error(error.error || error.message || `HTTP ${response.status}`);
+      }
+      
+      return response.json();
+    } catch (err) {
+      lastError = err as Error;
+      if (attempt < retries && !(err instanceof Error && err.name === "AbortError")) {
+        await new Promise((r) => setTimeout(r, Math.pow(2, attempt) * 500));
+      }
+    }
+  }
+  
+  throw lastError || new Error("Request failed after retries");
+}
+
+export async function fetchAPI<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
+  const { token, timeout = DEFAULT_TIMEOUT, ...fetchOptions } = options;
+  
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(options.headers || {}),
+    ...(typeof options.headers === 'object' && options.headers !== null 
+      ? options.headers as Record<string, string> 
+      : {}),
   };
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...fetchOptions,
-    headers,
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Error desconocido" }));
-    throw new Error(error.error || error.message || `HTTP ${response.status}`);
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
-  return response.json();
+  return fetchWithRetry<T>(
+    `${API_URL}${endpoint}`,
+    { ...fetchOptions, headers, credentials: "include" },
+    3,
+    timeout
+  );
 }
 
 export const api = {
   auth: {
     login: (email: string, password: string) =>
-      fetchAPI<{ success: boolean; message?: string; error?: string; user?: { id: string; email: string } }>("/api/auth/login", {
+      fetchAPI<{ success: boolean; message?: string; error?: string; user?: { id: string; email: string }; token?: string }>("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
       }),
@@ -42,8 +99,18 @@ export const api = {
       fetchAPI<{ success: boolean }>("/api/auth/logout", {
         method: "POST",
       }),
+    logoutWithToken: (token: string) =>
+      fetchAPI<{ success: boolean }>("/api/auth/logout", {
+        method: "POST",
+        token,
+      }),
     me: () =>
       fetchAPI<{ user: { _id: string; email: string } }>("/api/auth/me"),
+    changePassword: (data: { currentPassword: string; newPassword: string }) =>
+      fetchAPI<{ success: boolean; message?: string }>("/api/auth/change-password", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
   },
   ledStrips: {
     list: () => fetchAPI<LedStripDevice[]>("/api/leds"),
