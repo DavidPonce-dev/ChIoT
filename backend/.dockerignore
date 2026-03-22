@@ -1,0 +1,36 @@
+# --- Archivos y carpetas de entorno ---
+.env
+.env.local
+*.log
+
+# --- Carpetas de dependencias ---
+node_modules
+**/node_modules
+
+# --- Datos persistentes (volúmenes locales) ---
+data/
+
+# --- Archivos temporales ---
+*.tmp
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+
+# --- Archivos de compilación / cache ---
+dist
+build
+coverage
+.cache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- IDEs ---
+.vscode
+.idea
+*.iml
+
+# --- Docker ---
+docker-compose.override.yml

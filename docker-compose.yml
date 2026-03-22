@@ -1,0 +1,97 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      target: ${BUILD_TARGET:-development}
+    container_name: ChIoT-backend
+    profiles:
+      - dev
+      - prod
+    ports:
+      - "${PORT:-8080}:8080"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+    networks:
+      - iot_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: ${BUILD_TARGET:-development}
+    container_name: ChIoT-frontend
+    profiles:
+      - dev
+      - prod
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://host.docker.internal:8080
+      - WATCHPACK_POLLING=true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    networks:
+      - iot_net
+
+  mongodb:
+    image: mongo:6
+    container_name: mongodbb
+    restart: always
+    profiles:
+      - dev
+      - prod
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-mongo}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS:-mongo}
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/mongo:/data/db
+    networks:
+      - iot_net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    restart: always
+    profiles:
+      - dev
+      - prod
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./data/mosquitto/config:/mosquitto/config:ro
+      - ./data/mosquitto/data:/mosquitto/data
+      - ./data/mosquitto/log:/mosquitto/log
+    networks:
+      - iot_net
+
+networks:
+  iot_net:
+    driver: bridge
