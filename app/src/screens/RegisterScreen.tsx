@@ -65,7 +65,7 @@ export function RegisterScreen({navigation}: RegisterScreenProps) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.logo}>chIoT</Text>
+          <Text style={styles.logo}>chiot platform</Text>
           <Text style={styles.subtitle}>IoT Dashboard</Text>
         </View>
 

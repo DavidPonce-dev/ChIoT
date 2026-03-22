@@ -4,7 +4,7 @@ import { Providers } from "@/components/providers";
 import { Navbar } from "@/components/navbar";
 
 export const metadata: Metadata = {
-  title: "chIoT Dashboard",
+  title: "chiot platform Dashboard",
   description: "IoT Device Management Dashboard",
 };
 

@@ -3,7 +3,7 @@ services:
     build:
       context: ./backend
       target: ${BUILD_TARGET:-development}
-    container_name: ChIoT-backend
+    container_name: ChiotPlatform-backend
     profiles:
       - dev
       - prod
@@ -33,7 +33,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: ${BUILD_TARGET:-development}
-    container_name: ChIoT-frontend
+    container_name: ChiotPlatform-frontend
     profiles:
       - dev
       - prod

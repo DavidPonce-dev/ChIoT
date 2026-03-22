@@ -81,7 +81,7 @@ class BLEService {
           return;
         }
 
-        if (device && device.name?.startsWith('ChIoT_')) {
+        if (device && device.name?.startsWith('ChiotPlatform_')) {
           onDeviceFound({
             id: device.id,
             name: device.name || 'Unknown Device',

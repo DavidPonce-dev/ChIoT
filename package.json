@@ -1,5 +1,5 @@
 {
-  "name": "chiot",
+  "name": "chiot-platform",
   "version": "1.0.0",
   "private": true,
   "workspaces": [
@@ -27,6 +27,6 @@
     "logs": "docker compose logs -f",
     "logs:backend": "docker compose logs -f backend",
     "logs:frontend": "docker compose logs -f frontend",
-    "reset:frontend": "docker stop ChIoT-frontend && docker rm ChIoT-frontend && docker compose up -d frontend"
+    "reset:frontend": "docker stop ChiotPlatform-frontend && docker rm ChiotPlatform-frontend && docker compose up -d frontend"
   }
 }

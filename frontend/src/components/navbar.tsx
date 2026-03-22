@@ -144,7 +144,7 @@ export function Navbar() {
               <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/25">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-foreground">chIoT</span>
+              <span className="text-xl font-bold text-foreground">chiot platform</span>
             </Link>
 
             <Link

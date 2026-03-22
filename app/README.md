@@ -1,6 +1,6 @@
-# React Native ChIoT App
+# React Native chiot platform App
 
-Aplicación móvil para el sistema IoT chIoT.
+Aplicación móvil para el sistema IoT chiot platform.
 
 ## Requisitos
 

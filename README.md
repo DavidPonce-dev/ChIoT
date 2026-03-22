@@ -1,4 +1,4 @@
-# chIoT - Sistema IoT Completo
+# chiot platform - Sistema IoT Completo
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -109,7 +109,7 @@ Sistema IoT completo y moderno para el hogar inteligente. Controla dispositivos 
 
 ```bash
 git clone <repo-url>
-cd backend-chIoT
+cd chiot-platform
 
 # Iniciar todos los servicios con Docker
 npm run up
@@ -175,7 +175,7 @@ devices/online           # Dispositivos en línea
 ## Estructura del Proyecto
 
 ```
-backend-chIoT/
+chiot-platform/
 ├── backend/              # API REST + WebSocket + MQTT
 │   └── src/
 │       ├── routes/       # Endpoints de la API

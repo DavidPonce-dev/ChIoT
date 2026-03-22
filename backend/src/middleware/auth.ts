@@ -5,7 +5,7 @@ export interface AuthRequest extends Request {
   userId?: string;
 }
 
-const TOKEN_COOKIE_NAME = 'chiot_token';
+const TOKEN_COOKIE_NAME = 'chiotplatform_token';
 
 export function verifyToken(req: AuthRequest, res: Response, next: NextFunction) {
   let token: string | undefined;

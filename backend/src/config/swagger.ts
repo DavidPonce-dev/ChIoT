@@ -4,7 +4,7 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'ChIoT API',
+      title: 'chiot platform API',
       version: '1.0.0',
       description: 'Backend IoT para gestión de dispositivos inteligentes. Sistema monorepo que incluye backend API REST, MQTT para dispositivos IoT, WebSocket para notificaciones en tiempo real, y BLE provisioning para configuración de dispositivos.',
       contact: {

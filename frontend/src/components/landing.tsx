@@ -439,7 +439,7 @@ export function Landing() {
               <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <Zap className="w-4 h-4 text-white" />
               </div>
-              <span className="text-lg font-bold text-foreground">chIoT</span>
+              <span className="text-lg font-bold text-foreground">chiot platform</span>
             </div>
 
             <div className="flex gap-8 text-sm text-muted-foreground">
@@ -458,7 +458,7 @@ export function Landing() {
             </div>
 
             <div className="text-sm text-muted-foreground">
-              © 2026 chIoT. Todos los derechos reservados.
+              © 2026 chiot platform. Todos los derechos reservados.
             </div>
           </div>
         </div>
