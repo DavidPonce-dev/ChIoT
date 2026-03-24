@@ -45,7 +45,7 @@ export const API_CONFIG = {
 };
 
 export const DEVICE_TYPES = {
-  LED_STRIP: 'LED_STRIP',
+  LED_STRIP: 'led_strip',
   THERMOSTAT: 'thermostat',
   SMART_LOCK: 'smart_lock',
   SENSOR: 'sensor',

@@ -52,7 +52,7 @@ export function LedStripCard({ device }: LedStripCardProps) {
         </div>
         <DeleteButton
           uuid={device.uuid}
-          type="LED_STRIP"
+          type="led_strip"
           deviceName={device.name}
         />
       </div>

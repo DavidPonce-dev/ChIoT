@@ -1,8 +1,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define CONFIG_DEVICE_TYPE "LED_STRIP"
+#define CONFIG_DEVICE_TYPE "led_strip"
 #define CONFIG_FIRMWARE_VERSION "1.0.1"
+#define CONFIG_BACKEND_URL "http://192.168.1.100:8080"
 #define CONFIG_WIFI_AP_SSID "ChIoT_"
 #define CONFIG_WIFI_AP_PASSWORD ""  // MUST be set via BLE or NVS at provisioning
 #define CONFIG_WIFI_AP_MIN_PASSWORD_LENGTH 12

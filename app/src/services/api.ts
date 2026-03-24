@@ -56,7 +56,7 @@ export interface Device {
 }
 
 export interface LedStripDevice extends Device {
-  type: 'LED_STRIP';
+  type: 'led_strip';
   state: {
     brightness?: number;
     color?: string;

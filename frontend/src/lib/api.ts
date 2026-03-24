@@ -1,3 +1,39 @@
+import {
+  DeviceTypes,
+  LedStripModes,
+  ThermostatModes,
+  type DeviceType,
+  type LedStripMode,
+  type ThermostatMode,
+  type BaseDevice,
+  type LedStripState,
+  type ThermostatState,
+  type SmartLockState,
+  type SensorState,
+  type LedStripDevice,
+  type ThermostatDevice,
+  type SmartLockDevice,
+  type SensorDevice,
+} from "@chiot-platform/shared/types/devices";
+
+export {
+  DeviceTypes,
+  LedStripModes,
+  ThermostatModes,
+  type DeviceType,
+  type LedStripMode,
+  type ThermostatMode,
+  type BaseDevice,
+  type LedStripState,
+  type ThermostatState,
+  type SmartLockState,
+  type SensorState,
+  type LedStripDevice,
+  type ThermostatDevice,
+  type SmartLockDevice,
+  type SensorDevice,
+};
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const DEFAULT_TIMEOUT = 10000;
 
@@ -157,70 +193,3 @@ export const api = {
       fetchAPI<{ message: string }>(`/api/sensors/${uuid}`, { method: "DELETE" }),
   },
 };
-
-export const DeviceTypes = {
-  LED_STRIP: "LED_STRIP",
-  THERMOSTAT: "thermostat",
-  SMART_LOCK: "smart_lock",
-  SENSOR: "sensor",
-} as const;
-
-export type DeviceType = "LED_STRIP" | "thermostat" | "smart_lock" | "sensor";
-
-export const LedStripModes = ["static", "rainbow", "fire", "wave", "candle"] as const;
-export type LedStripMode = "static" | "rainbow" | "fire" | "wave" | "candle";
-
-export const ThermostatModes = ["off", "cool", "heat"] as const;
-export type ThermostatMode = "off" | "cool" | "heat";
-
-export interface BaseDevice {
-  uuid: string;
-  name: string;
-  type: DeviceType;
-  owner: string | null;
-  state: Record<string, unknown>;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface LedStripState {
-  power?: boolean;
-  brightness?: number;
-  color?: string;
-  mode?: LedStripMode;
-  speed?: number;
-}
-
-export interface ThermostatState {
-  temperature?: number;
-  mode?: ThermostatMode;
-}
-
-export interface SmartLockState {
-  locked?: boolean;
-}
-
-export interface SensorState {
-  temperature?: number;
-  humidity?: number;
-}
-
-export interface LedStripDevice extends Omit<BaseDevice, "state"> {
-  type: "LED_STRIP";
-  state: LedStripState;
-}
-
-export interface ThermostatDevice extends Omit<BaseDevice, "state"> {
-  type: "thermostat";
-  state: ThermostatState;
-}
-
-export interface SmartLockDevice extends Omit<BaseDevice, "state"> {
-  type: "smart_lock";
-  state: SmartLockState;
-}
-
-export interface SensorDevice extends Omit<BaseDevice, "state"> {
-  type: "sensor";
-  state: SensorState;
-}

@@ -9,10 +9,10 @@ interface AddDeviceModalProps {
   onSuccess: () => void;
 }
 
-type DeviceType = "LED_STRIP" | "thermostat" | "smart_lock" | "sensor";
+type DeviceType = "led_strip" | "thermostat" | "smart_lock" | "sensor";
 
 const DEVICE_TYPES: { value: DeviceType; label: string; icon: string }[] = [
-  { value: "LED_STRIP", label: "Tira LED", icon: "💡" },
+  { value: "led_strip", label: "Tira LED", icon: "💡" },
   { value: "thermostat", label: "Termostato", icon: "🌡️" },
   { value: "smart_lock", label: "Cerradura", icon: "🔒" },
   { value: "sensor", label: "Sensor", icon: "📡" },
@@ -20,7 +20,7 @@ const DEVICE_TYPES: { value: DeviceType; label: string; icon: string }[] = [
 
 export function AddDeviceModal({ onClose, onSuccess }: AddDeviceModalProps) {
   const [name, setName] = useState("");
-  const [type, setType] = useState<DeviceType>("LED_STRIP");
+  const [type, setType] = useState<DeviceType>("led_strip");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -36,7 +36,7 @@ export function AddDeviceModal({ onClose, onSuccess }: AddDeviceModalProps) {
 
     try {
       switch (type) {
-        case "LED_STRIP":
+        case "led_strip":
           await api.ledStrips.create({ name });
           break;
         case "thermostat":

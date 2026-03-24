@@ -29,7 +29,7 @@ const SensorCard = dynamic(() => import("./devices/sensor-card").then((mod) => m
   loading: () => <div className="h-56 bg-[var(--card)] rounded-xl animate-pulse" />,
 });
 
-type DeviceType = "LED_STRIP" | "thermostat" | "smart_lock" | "sensor";
+type DeviceType = "led_strip" | "thermostat" | "smart_lock" | "sensor";
 
 export function Dashboard() {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -54,7 +54,7 @@ export function Dashboard() {
   }, [devices, filter, debouncedSearch]);
 
   const groupedDevices = {
-    LED_STRIP: filteredDevices.filter((d) => d.type === "LED_STRIP"),
+    led_strip: filteredDevices.filter((d) => d.type === "led_strip"),
     thermostat: filteredDevices.filter((d) => d.type === "thermostat"),
     smart_lock: filteredDevices.filter((d) => d.type === "smart_lock"),
     sensor: filteredDevices.filter((d) => d.type === "sensor"),
@@ -124,7 +124,7 @@ export function Dashboard() {
               <FilterButton active={filter === "all"} onClick={() => setFilter("all")}>
                 Todos
               </FilterButton>
-              <FilterButton active={filter === "LED_STRIP"} onClick={() => setFilter("LED_STRIP")}>
+              <FilterButton active={filter === "led_strip"} onClick={() => setFilter("led_strip")}>
                 LED
               </FilterButton>
               <FilterButton active={filter === "thermostat"} onClick={() => setFilter("thermostat")}>
@@ -177,9 +177,9 @@ export function Dashboard() {
           </div>
         ) : (
           <div className="space-y-8">
-            {groupedDevices.LED_STRIP.length > 0 && (
+            {groupedDevices.led_strip.length > 0 && (
               <DeviceSection title="Tiras LED">
-                {groupedDevices.LED_STRIP.map((device) => (
+                {groupedDevices.led_strip.map((device) => (
                   <LedStripCard key={device.uuid} device={device} />
                 ))}
               </DeviceSection>

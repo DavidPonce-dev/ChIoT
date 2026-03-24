@@ -1,5 +1,5 @@
 export const DeviceTypes = {
-  LED_STRIP: "LED_STRIP",
+  LED_STRIP: "led_strip",
   THERMOSTAT: "thermostat",
   SMART_LOCK: "smart_lock",
   SENSOR: "sensor",

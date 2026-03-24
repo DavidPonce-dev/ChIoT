@@ -1,19 +1,8 @@
 import { z } from 'zod';
+import { DeviceTypes, LedStripModes, ThermostatModes } from '@chiot-platform/shared/types/devices';
 
-export const DeviceTypes = {
-  LED_STRIP: 'LED_STRIP',
-  THERMOSTAT: 'thermostat',
-  SMART_LOCK: 'smart_lock',
-  SENSOR: 'sensor',
-} as const;
-
-export type DeviceType = (typeof DeviceTypes)[keyof typeof DeviceTypes];
-
-export const LedStripModes = ['static', 'rainbow', 'fire', 'wave', 'candle'] as const;
-export type LedStripMode = (typeof LedStripModes)[number];
-
-export const ThermostatModes = ['off', 'cool', 'heat'] as const;
-export type ThermostatMode = (typeof ThermostatModes)[number];
+export { DeviceTypes, LedStripModes, ThermostatModes };
+export type { DeviceType, LedStripMode, ThermostatMode } from '@chiot-platform/shared/types/devices';
 
 export const deviceTypesList = Object.values(DeviceTypes);
 
