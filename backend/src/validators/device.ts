@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { DeviceTypes, LedStripModes, ThermostatModes } from '@chiot-platform/shared/types/devices';
+import { DeviceTypes, LedStripModes, ThermostatModes } from '../../shared/types/devices';
 
 export { DeviceTypes, LedStripModes, ThermostatModes };
-export type { DeviceType, LedStripMode, ThermostatMode } from '@chiot-platform/shared/types/devices';
+export type { DeviceType, LedStripMode, ThermostatMode } from '../../shared/types/devices';
 
 export const deviceTypesList = Object.values(DeviceTypes);
 

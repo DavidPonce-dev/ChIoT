@@ -7,9 +7,9 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "baseUrl": "..",
+    "baseUrl": ".",
     "paths": {
-      "@chiot-platform/shared/*": ["shared/*"]
+      "@chiot-platform/shared/*": ["../shared/*"]
     }
   },
   "include": ["src/**/*"]

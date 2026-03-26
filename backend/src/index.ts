@@ -52,7 +52,12 @@ app.use(
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: [
+      'http://localhost:3000',
+      'http://localhost',
+      'http://localhost:80',
+      'http://192.168.1.115:80',
+    ],
     credentials: true,
   })
 );

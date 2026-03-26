@@ -1,7 +1,8 @@
 services:
   backend:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
       target: ${BUILD_TARGET:-development}
     container_name: ChiotPlatform-backend
     profiles:
@@ -12,8 +13,9 @@ services:
     env_file:
       - ./backend/.env
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - ./backend/src:/app/src
+      - ./backend/tsconfig.json:/app/tsconfig.json
+      - ./shared:/app/shared
     depends_on:
       mongodb:
         condition: service_healthy
@@ -30,24 +32,25 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
       target: ${BUILD_TARGET:-development}
     container_name: ChiotPlatform-frontend
     profiles:
       - dev
       - prod
     ports:
-      - "3000:3000"
+      - "80:3000"
     environment:
+      - HOST=0.0.0.0
       - NEXT_PUBLIC_API_URL=http://localhost:8080
       - WATCHPACK_POLLING=true
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./shared:/app/shared
     depends_on:
       - backend
     networks:
@@ -63,8 +66,6 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-mongo}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS:-mongo}
-    ports:
-      - "27017:27017"
     volumes:
       - ./data/mongo:/data/db
     networks:

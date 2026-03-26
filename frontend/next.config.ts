@@ -7,7 +7,7 @@ const ContentSecurityPolicy = `
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: https: blob:;
   font-src 'self' data:;
-  connect-src 'self' ws: wss: http://localhost:* http://127.0.0.1:*;
+  connect-src 'self' ws: wss: http://localhost:* http://127.0.0.1:* http://192.168.1.115:8080;
   frame-src 'none';
   object-src 'none';
   base-uri 'self';
@@ -51,6 +51,14 @@ const withPWA = withPWAInit({
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "http://192.168.1.115:8080/api/:path*",
+      },
+    ];
+  },
   async headers() {
     return [
       {

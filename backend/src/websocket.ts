@@ -14,7 +14,11 @@ const clients = new Map<string, Set<AuthenticatedWebSocket>>();
 
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || [
   'http://localhost:3000',
+  'http://localhost',
+  'http://localhost:80',
   'http://127.0.0.1:3000',
+  'http://127.0.0.1',
+  'http://192.168.1.115:80',
 ];
 
 function validateOrigin(origin: string | undefined): boolean {

@@ -3,21 +3,36 @@
 
 #define CONFIG_DEVICE_TYPE "led_strip"
 #define CONFIG_FIRMWARE_VERSION "1.0.1"
-#define CONFIG_BACKEND_URL "http://192.168.1.100:8080"
+
+#ifndef CONFIG_BACKEND_URL
+#define CONFIG_BACKEND_URL "http://localhost:8080"
+#endif
+
 #define CONFIG_WIFI_AP_SSID "ChIoT_"
-#define CONFIG_WIFI_AP_PASSWORD ""  // MUST be set via BLE or NVS at provisioning
+#define CONFIG_WIFI_AP_PASSWORD ""
 #define CONFIG_WIFI_AP_MIN_PASSWORD_LENGTH 12
 #define CONFIG_WIFI_CONNECT_TIMEOUT 30
-#define CONFIG_MQTT_BROKER_URL "mqtt://192.168.1.100:1883"
-#define CONFIG_MQTT_USERNAME ""  // MUST be set via BLE or NVS at provisioning
-#define CONFIG_MQTT_PASSWORD ""  // MUST be set via BLE or NVS at provisioning
+
+#ifndef CONFIG_MQTT_BROKER_URL
+#define CONFIG_MQTT_BROKER_URL "mqtt://localhost:1883"
+#endif
+
+#define CONFIG_MQTT_USERNAME ""
+#define CONFIG_MQTT_PASSWORD ""
 #define CONFIG_MQTT_RECONNECT_INTERVAL_MS 5000
 #define CONFIG_MQTT_KEEPALIVE 60
 #define CONFIG_OTA_ENABLED 1
 #define CONFIG_OTA_CHECK_INTERVAL 3600
-#define CONFIG_OTA_SERVER_URL "http://192.168.1.100:8080"
+
+#ifndef CONFIG_OTA_SERVER_URL
+#define CONFIG_OTA_SERVER_URL "http://localhost:8080"
+#endif
+
 #define CONFIG_NVS_NAMESPACE "chiot"
 #define CONFIG_LOG_LEVEL 3
 #define CONFIG_DEVICE_NAME "ESP32 LED Strip"
+
+#define CONFIG_BLE_BONDING_ENABLED 1
+#define CONFIG_MAX_BONDED_DEVICES 3
 
 #endif

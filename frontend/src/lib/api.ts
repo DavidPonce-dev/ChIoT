@@ -14,7 +14,7 @@ import {
   type ThermostatDevice,
   type SmartLockDevice,
   type SensorDevice,
-} from "@chiot-platform/shared/types/devices";
+} from "../../shared/types/devices";
 
 export {
   DeviceTypes,
