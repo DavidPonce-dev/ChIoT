@@ -1,12 +1,28 @@
 import {BleManager, Device} from 'react-native-ble-plx';
 import {Platform, PermissionsAndroid} from 'react-native';
 
-const SERVICE_UUID = '0000FFFE-0000-1000-8000-00805F9B34FB';
-const CHAR_WIFI_SSID = '0000FF01-0000-1000-8000-00805F9B34FB';
-const CHAR_WIFI_PASS = '0000FF02-0000-1000-8000-00805F9B34FB';
-const CHAR_PAIRING_CODE = '0000FF03-0000-1000-8000-00805F9B34FB';
-const CHAR_DEVICE_INFO = '0000FF04-0000-1000-8000-00805F9B34FB';
-const CHAR_CONTROL = '0000FF06-0000-1000-8000-00805F9B34FB';
+const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
+const CHAR_WIFI_SSID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+const CHAR_WIFI_PASS = 'beb5483f-36e1-4688-b7f5-ea07361b26a9';
+const CHAR_PAIRING_CODE = 'beb54840-36e1-4688-b7f5-ea07361b26aa';
+const CHAR_DEVICE_INFO = 'beb54842-36e1-4688-b7f5-ea07361b26ac';
+const CHAR_CONTROL = 'beb54841-36e1-4688-b7f5-ea07361b26ab';
+const CHAR_STATUS = 'beb54843-36e1-4688-b7f5-ea07361b26ad';
+
+export enum BLEProvisionStatus {
+  IDLE = 0,
+  CONNECTING_WIFI = 1,
+  WIFI_CONNECTED = 2,
+  WIFI_FAILED = 3,
+  REGISTERING = 4,
+  REGISTERED = 5,
+  ERROR = 99,
+}
+
+export interface BLEStatusUpdate {
+  status: BLEProvisionStatus;
+  message: string;
+}
 
 export interface DiscoveredBLEDevice {
   id: string;
@@ -22,10 +38,13 @@ export interface BLEProvisionConfig {
   pairingCode: string;
 }
 
+type StatusCallback = (update: BLEStatusUpdate) => void;
+
 class BLEService {
   private manager: BleManager;
   private isScanning: boolean = false;
   private connectedDevice: Device | null = null;
+  private statusSubscription: any = null;
 
   constructor() {
     this.manager = new BleManager();
@@ -114,6 +133,10 @@ class BLEService {
   }
 
   async disconnect(): Promise<void> {
+    if (this.statusSubscription) {
+      this.statusSubscription.remove();
+      this.statusSubscription = null;
+    }
     if (this.connectedDevice) {
       try {
         await this.connectedDevice.cancelConnection();
@@ -121,6 +144,39 @@ class BLEService {
         console.warn('Disconnect error:', error);
       }
       this.connectedDevice = null;
+    }
+  }
+
+  async subscribeToStatus(callback: StatusCallback): Promise<void> {
+    if (!this.connectedDevice) {
+      throw new Error('No device connected');
+    }
+
+    try {
+      const characteristics = await this.connectedDevice.characteristicsForService(
+        SERVICE_UUID,
+      );
+      const statusChar = characteristics.find(c => c.uuid === CHAR_STATUS);
+
+      if (!statusChar) {
+        throw new Error('Status characteristic not found');
+      }
+
+      this.statusSubscription = statusChar.monitor((error: Error | null, char: any) => {
+        if (error) {
+          console.error('Status monitor error:', error);
+          return;
+        }
+        if (char?.value) {
+          const [statusStr, ...messageParts] = this.base64ToString(char.value).split('|');
+          const status = parseInt(statusStr, 10);
+          const message = messageParts.join('|');
+          callback({status: status as BLEProvisionStatus, message});
+        }
+      });
+    } catch (error) {
+      console.error('Subscribe to status error:', error);
+      throw error;
     }
   }
 
@@ -163,23 +219,22 @@ class BLEService {
     }
   }
 
-  async getDeviceInfo(): Promise<{uuid: string; type: string; pin: string}> {
+  async getDeviceInfo(): Promise<{uuid: string; type: string; pairingCode: string}> {
     try {
-      const [uuid, type, pin] = await Promise.all([
-        this.readCharacteristic(CHAR_DEVICE_INFO),
+      const [deviceInfo, pairingCode] = await Promise.all([
         this.readCharacteristic(CHAR_DEVICE_INFO),
         this.readCharacteristic(CHAR_PAIRING_CODE),
       ]);
 
-      const [deviceUuid, deviceType] = uuid.split('|');
+      const [deviceUuid, deviceType] = deviceInfo.split('|');
       return {
         uuid: deviceUuid || '',
-        type: deviceType || 'LED_STRIP',
-        pin: pin || '',
+        type: deviceType || 'led_strip',
+        pairingCode: pairingCode || '',
       };
     } catch (error) {
       console.error('Get device info error:', error);
-      return {uuid: '', type: 'LED_STRIP', pin: ''};
+      return {uuid: '', type: 'led_strip', pairingCode: ''};
     }
   }
 
@@ -189,20 +244,16 @@ class BLEService {
     }
 
     try {
-      const ssidData = '\x01' + config.ssid;
-      const passData = '\x02' + config.password;
-      const codeData = '\x03' + config.pairingCode;
-
-      await this.writeCharacteristic(CHAR_WIFI_SSID, ssidData);
+      await this.writeCharacteristic(CHAR_WIFI_SSID, config.ssid);
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      await this.writeCharacteristic(CHAR_WIFI_PASS, passData);
+      await this.writeCharacteristic(CHAR_WIFI_PASS, config.password);
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      await this.writeCharacteristic(CHAR_PAIRING_CODE, codeData);
+      await this.writeCharacteristic(CHAR_PAIRING_CODE, config.pairingCode);
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      await this.writeCharacteristic(CHAR_CONTROL, '\x10');
+      await this.writeCharacteristic(CHAR_CONTROL, 'complete');
 
       await new Promise(resolve => setTimeout(resolve, 2000));
 

@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {pairingService} from '../services/api';
-import {bleService, DiscoveredBLEDevice} from '../services/bleService';
+import {bleService, DiscoveredBLEDevice, BLEProvisionStatus, BLEStatusUpdate} from '../services/bleService';
 import {useAuthStore} from '../store/auth';
 
 type RootStackParamList = {
@@ -43,8 +43,10 @@ export function ProvisioningScreen({navigation}: ProvisioningScreenProps) {
   const [password, setPassword] = useState('');
   const [provisioning, setProvisioning] = useState(false);
   const [pairingCode, setPairingCode] = useState<string | null>(null);
+  const [devicePairingCode, setDevicePairingCode] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [provisionStatus, setProvisionStatus] = useState<BLEStatusUpdate | null>(null);
 
   useEffect(() => {
     initializeBLE();
@@ -67,27 +69,10 @@ export function ProvisioningScreen({navigation}: ProvisioningScreenProps) {
         return;
       }
 
-      generatePairingCode();
       startScan();
     } catch (err) {
       console.error('BLE init error:', err);
       setError('Error inicializando Bluetooth');
-    }
-  };
-
-  const generatePairingCode = async () => {
-    if (!token) {
-      setError('No hay sesión activa');
-      return;
-    }
-    
-    try {
-      const response = await pairingService.generateCode(token);
-      setPairingCode(response.code);
-      console.log('Pairing code generated:', response.code);
-    } catch (err) {
-      console.error('Failed to generate pairing code:', err);
-      setError('Error generando código de emparejamiento');
     }
   };
 
@@ -142,11 +127,6 @@ export function ProvisioningScreen({navigation}: ProvisioningScreenProps) {
       return;
     }
 
-    if (!pairingCode) {
-      Alert.alert('Error', 'No hay código de emparejamiento. Genera uno nuevo.');
-      return;
-    }
-
     setProvisioning(true);
     setError(null);
 
@@ -159,17 +139,45 @@ export function ProvisioningScreen({navigation}: ProvisioningScreenProps) {
 
       const deviceInfo = await bleService.getDeviceInfo();
       console.log('Device info:', deviceInfo);
+      setDevicePairingCode(deviceInfo.pairingCode);
+
+      if (!deviceInfo.pairingCode) {
+        Alert.alert('Error', 'No se pudo leer el código del dispositivo');
+        setProvisioning(false);
+        setConnecting(false);
+        return;
+      }
+
+      bleService.subscribeToStatus((update: BLEStatusUpdate) => {
+        setProvisionStatus(update);
+        console.log('Device status:', update);
+
+        if (update.status === BLEProvisionStatus.REGISTERED) {
+          Alert.alert(
+            'Éxito',
+            'Dispositivo configurado y registrado correctamente',
+            [
+              {
+                text: 'OK',
+                onPress: () => navigation.navigate('Dashboard'),
+              },
+            ],
+          );
+        } else if (update.status === BLEProvisionStatus.WIFI_FAILED) {
+          Alert.alert('Error', 'Error conectando al WiFi: ' + update.message);
+        } else if (update.status === BLEProvisionStatus.ERROR) {
+          Alert.alert('Error', update.message);
+        }
+      });
 
       const success = await bleService.sendWiFiCredentials({
         ssid: ssid.trim(),
         password: password.trim(),
-        pairingCode: pairingCode,
+        pairingCode: deviceInfo.pairingCode,
       });
 
       if (success) {
-        console.log('Credentials sent successfully');
-        
-        await bleService.disconnect();
+        console.log('Credentials sent successfully, waiting for device status...');
 
         Alert.alert(
           'Éxito',
@@ -236,13 +244,30 @@ export function ProvisioningScreen({navigation}: ProvisioningScreenProps) {
         </View>
       )}
 
-      {pairingCode && (
+      {devicePairingCode && (
         <View style={styles.codeContainer}>
-          <Text style={styles.codeLabel}>Código de Emparejamiento</Text>
-          <Text style={styles.codeValue}>{pairingCode}</Text>
+          <Text style={styles.codeLabel}>Código del Dispositivo</Text>
+          <Text style={styles.codeValue}>{devicePairingCode}</Text>
           <Text style={styles.codeHint}>
-            Este código se envía al dispositivo por Bluetooth
+            Ingresa este código en el dashboard web
           </Text>
+        </View>
+      )}
+
+      {provisionStatus && (
+        <View style={styles.statusContainer}>
+          <Text style={styles.statusLabel}>Estado del Dispositivo</Text>
+          <Text style={styles.statusValue}>
+            {provisionStatus.status === BLEProvisionStatus.CONNECTING_WIFI && 'Conectando a WiFi...'}
+            {provisionStatus.status === BLEProvisionStatus.WIFI_CONNECTED && 'WiFi conectado'}
+            {provisionStatus.status === BLEProvisionStatus.WIFI_FAILED && 'Error de WiFi'}
+            {provisionStatus.status === BLEProvisionStatus.REGISTERING && 'Registrando dispositivo...'}
+            {provisionStatus.status === BLEProvisionStatus.REGISTERED && 'Registrado'}
+            {provisionStatus.status === BLEProvisionStatus.ERROR && 'Error'}
+          </Text>
+          {provisionStatus.message && provisionStatus.status !== BLEProvisionStatus.REGISTERED && (
+            <Text style={styles.statusMessage}>{provisionStatus.message}</Text>
+          )}
         </View>
       )}
 
@@ -281,13 +306,6 @@ export function ProvisioningScreen({navigation}: ProvisioningScreenProps) {
             <Text style={styles.modalSubtitle}>
               Ingresa las credenciales WiFi para {selectedDevice?.name}
             </Text>
-
-            {pairingCode && (
-              <View style={styles.modalCodeContainer}>
-                <Text style={styles.modalCodeLabel}>Código:</Text>
-                <Text style={styles.modalCodeValue}>{pairingCode}</Text>
-              </View>
-            )}
 
             <TextInput
               style={styles.input}
@@ -403,6 +421,30 @@ const styles = StyleSheet.create({
     fontSize: 10,
     marginTop: 8,
     textAlign: 'center',
+  },
+  statusContainer: {
+    backgroundColor: '#1a1a1a',
+    marginHorizontal: 16,
+    marginTop: 8,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#6366f1',
+  },
+  statusLabel: {
+    color: '#888',
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  statusValue: {
+    color: '#6366f1',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  statusMessage: {
+    color: '#888',
+    fontSize: 12,
+    marginTop: 4,
   },
   content: {
     flex: 1,

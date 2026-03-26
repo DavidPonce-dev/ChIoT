@@ -27,6 +27,6 @@
     "logs": "docker compose logs -f frontend backend",
     "logs:backend": "docker compose logs -f backend",
     "logs:frontend": "docker compose logs -f frontend",
-    "reset:frontend": "docker stop ChiotPlatform-frontend && docker rm ChiotPlatform-frontend && docker compose up -d frontend"
+    "res:front": "docker compose --profile dev rm -sf frontend && docker compose --profile dev up -d frontend"
   }
 }

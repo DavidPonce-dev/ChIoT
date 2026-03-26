@@ -24,7 +24,7 @@ Sistema IoT completo y moderno para el hogar inteligente. Controla dispositivos 
 ### 3. Multi-Plataforma
 - **Dashboard Web**: Next.js 15 con Tailwind CSS 4, diseño responsive y Material Design
 - **App Móvil**: React Native para iOS y Android
-- **Firmware**: PlatformIO compatible con ESP32 y ESP8266
+- **Firmware**: Arduino IDE compatible con ESP32
 
 ### 4. Seguridad Robusta
 - Autenticación con **JWT en cookies HTTP-only**
@@ -103,7 +103,7 @@ Sistema IoT completo y moderno para el hogar inteligente. Controla dispositivos 
 ### Requisitos
 - Docker y Docker Compose
 - Node.js 20+ (para desarrollo local)
-- PlatformIO (para compilar firmware)
+- Arduino IDE con ESP32 Core (para compilar firmware)
 
 ### 1. Clonar y Ejecutar
 
@@ -191,10 +191,12 @@ chiot-platform/
 │   └── src/
 │       ├── screens/      # Pantallas
 │       └── services/     # BLE, API
-├── firmware/             # Firmware ESP32 (PlatformIO)
-│   └── lib/
-│       ├── ble_provisioning/
-│       └── mqtt_client/
+├── firmware/             # Firmware ESP32 (Arduino IDE)
+│   ├── firmware.ino      # Sketch principal
+│   ├── Config.h          # Configuracion
+│   ├── BLEProvision.h    # Aprovisionamiento BLE
+│   ├── MQTTClient.h      # Cliente MQTT
+│   └── LEDStrip.h        # Control LED
 ├── shared/               # Tipos TypeScript compartidos
 ├── docker-compose.yml     # Orquestación
 └── README.md
@@ -242,12 +244,15 @@ El firmware soporta configuración via Bluetooth:
 7. **Dispositivo** inicia cliente MQTT
 
 ### UUIDs GATT
-| UUID | Función |
-|------|---------|
-| `0xFF01` | SSID WiFi |
-| `0xFF02` | Password WiFi |
-| `0xFF03` | Código de emparejamiento |
-| `0xFF05` | PIN |
+| UUID | Función | Propiedades |
+|------|---------|-------------|
+| `4fafc201-1fb5-459e-8fcc-c5c9c331914b` | Service | GATT Primary |
+| `beb5483e-36e1-4688-b7f5-ea07361b26a8` | SSID WiFi | WRITE |
+| `beb5483f-36e1-4688-b7f5-ea07361b26a9` | Password WiFi | WRITE |
+| `beb54840-36e1-4688-b7f5-ea07361b26aa` | Código de emparejamiento | WRITE |
+| `beb54842-36e1-4688-b7f5-ea07361b26ac` | Info dispositivo | READ |
+| `beb54841-36e1-4688-b7f5-ea07361b26ab` | Control | WRITE_NR |
+| `beb54843-36e1-4688-b7f5-ea07361b26ad` | Estado (feedback) | READ, NOTIFY |
 
 ---
 

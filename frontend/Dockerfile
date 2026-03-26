@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 WORKDIR /app
 
 FROM base AS development
@@ -12,7 +12,7 @@ COPY frontend/next-env.d.ts ./
 COPY frontend/postcss.config.js ./
 COPY frontend/tsconfig.json ./
 EXPOSE 3000
-CMD ["node", "node_modules/next/dist/bin/next", "dev", "--turbopack"]
+CMD node node_modules/next/dist/bin/next dev -H ${HOST:-0.0.0.0}
 
 FROM base AS production
 COPY frontend/package*.json ./
